@@ -28,7 +28,7 @@ class SettingsScreen extends ConsumerWidget {
             title: "API Keys",
             subtitle: "Manage access tokens for CLI",
             icon: Icons.vpn_key_outlined,
-            onTap: () {},
+            onTap: () => context.push('/api-keys'),
           ),
         ],
       ),

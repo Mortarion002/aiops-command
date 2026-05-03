@@ -12,6 +12,7 @@ import '../../features/activity/screens/activity_screen.dart';
 import '../../features/insights/screens/insights_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/profile_screen.dart';
+import '../../features/settings/screens/api_keys_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
@@ -78,6 +79,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/api-keys',
+        builder: (context, state) => const ApiKeysScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppScaffold(shell: shell),
