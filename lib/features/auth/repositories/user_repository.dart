@@ -25,7 +25,7 @@ class UserRepository {
 }
 
 @riverpod
-UserRepository userRepository(UserRepositoryRef ref) {
+UserRepository userRepository(Ref ref) {
   return UserRepository();
 }
 
