@@ -111,4 +111,4 @@ lib/
 ---
 
 ## 📜 License
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
