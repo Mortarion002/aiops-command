@@ -55,7 +55,7 @@ final class ActivityRepositoryProvider
 }
 
 String _$activityRepositoryHash() =>
-    r'0f53611113cc9c7cb3205b15e648c6b04a6256e0';
+    r'09f77c231f99546ba7f16ada5ad34dcc6b4e1b65';
 
 @ProviderFor(LogFilterNotifier)
 final logFilterProvider = LogFilterNotifierProvider._();
@@ -146,4 +146,4 @@ final class LogsDataProvider
   }
 }
 
-String _$logsDataHash() => r'5f40ebc7b468c8bad210f7a72109f4e4d4026c44';
+String _$logsDataHash() => r'80aadfbd553ab3954f93f28ecd37892d5fc72138';

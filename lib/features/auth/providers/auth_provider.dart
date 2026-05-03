@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../repositories/user_repository.dart';
+import '../models/app_user.dart';
 
 part 'auth_provider.g.dart';
 
@@ -12,9 +14,19 @@ class AuthNotifier extends _$AuthNotifier {
     await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> signUpWithEmail(String email, String password, String name) async {
+  Future<void> signUpWithEmail(String email, String password, String name, {int? age}) async {
     final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
     await cred.user?.updateDisplayName(name);
+    
+    if (cred.user != null) {
+      final newUser = AppUser(
+        id: cred.user!.uid,
+        email: email,
+        name: name,
+        age: age,
+      );
+      await ref.read(userRepositoryProvider).createUser(newUser);
+    }
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
@@ -34,3 +46,4 @@ class AuthErrorNotifier extends _$AuthErrorNotifier {
   void setError(String? message) => state = message;
   void clear() => state = null;
 }
+

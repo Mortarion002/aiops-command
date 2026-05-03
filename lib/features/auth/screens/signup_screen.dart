@@ -20,6 +20,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _ageController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -28,6 +29,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _ageController.dispose();
     super.dispose();
   }
 
@@ -36,9 +38,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirm = _confirmPasswordController.text;
+    final ageText = _ageController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || ageText.isEmpty) {
       ref.read(authErrorProvider.notifier).setError("All fields are required");
+      return;
+    }
+
+    final age = int.tryParse(ageText);
+    if (age == null || age < 1 || age > 120) {
+      ref.read(authErrorProvider.notifier).setError("Please enter a valid age");
       return;
     }
     
@@ -56,7 +65,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     ref.read(authErrorProvider.notifier).clear();
 
     try {
-      await ref.read(authProvider.notifier).signUpWithEmail(email, password, name);
+      await ref.read(authProvider.notifier).signUpWithEmail(email, password, name, age: age);
       // Router will handle navigation
     } catch (e) {
       ref.read(authErrorProvider.notifier).setError("Failed to create account. Please try again.");
@@ -108,6 +117,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 label: "Confirm Password",
                 obscureText: true,
                 controller: _confirmPasswordController,
+              ),
+              const SizedBox(height: 16),
+              AuthTextField(
+                label: "Age",
+                keyboardType: TextInputType.number,
+                controller: _ageController,
               ),
               const SizedBox(height: 24),
               const AuthErrorBanner(),

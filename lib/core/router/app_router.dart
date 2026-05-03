@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,29 +11,55 @@ import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/activity/screens/activity_screen.dart';
 import '../../features/insights/screens/insights_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/settings/screens/profile_screen.dart';
+import '../../features/settings/screens/api_keys_screen.dart';
+import '../../features/settings/screens/notifications_screen.dart';
+import '../../features/settings/screens/documentation_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
 part 'app_router.g.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+  late final StreamSubscription<dynamic> _subscription;
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 @riverpod
 GoRouter appRouter(Ref ref) {
-  final authState = ref.watch(authProvider);
+  final authNotifier = ref.watch(authProvider.notifier);
 
   return GoRouter(
     initialLocation: '/onboarding',
+    refreshListenable: GoRouterRefreshStream(authNotifier.build()),
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
+      
+      if (authState.isLoading) return null;
+
       final isAuthenticated = authState.value != null;
-
-      if (state.matchedLocation.startsWith('/onboarding')) return null;
-
+      final location = state.uri.path;
+      final isOnboarding = location.startsWith('/onboarding');
       final isAuthRoute = ['/login', '/signup', '/forgot-password']
-          .contains(state.matchedLocation);
-          
-      if (isAuthenticated && isAuthRoute) return '/dashboard';
-      if (!isAuthenticated && !isAuthRoute) return '/onboarding';
+          .contains(location);
 
-      return null;
+      if (isAuthenticated) {
+        if (isAuthRoute || isOnboarding) return '/dashboard';
+        return null;
+      } else {
+        if (!isAuthRoute && !isOnboarding) return '/onboarding';
+        return null;
+      }
     },
     routes: [
       GoRoute(
@@ -50,6 +77,22 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/api-keys',
+        builder: (context, state) => const ApiKeysScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/documentation',
+        builder: (context, state) => const DocumentationScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppScaffold(shell: shell),

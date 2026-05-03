@@ -55,7 +55,7 @@ final class DashboardRepositoryProvider
 }
 
 String _$dashboardRepositoryHash() =>
-    r'10d8ac273402851cb19fc2f4b7d8fd1b5c1f4f07';
+    r'f9775ae11cc2ffd5f2c20532cb6606ed1d0aa33b';
 
 @ProviderFor(kpiData)
 final kpiDataProvider = KpiDataProvider._();
@@ -94,7 +94,7 @@ final class KpiDataProvider
   }
 }
 
-String _$kpiDataHash() => r'f10262c6993e098597bc368dc81bddf8cc780e12';
+String _$kpiDataHash() => r'46b078d6913ea83ace0eb0d6d3fb5004ffaab4d8';
 
 @ProviderFor(systemHealthData)
 final systemHealthDataProvider = SystemHealthDataProvider._();
@@ -133,7 +133,7 @@ final class SystemHealthDataProvider
   }
 }
 
-String _$systemHealthDataHash() => r'c81e9f23262e160904f9254fbca517aa8946516b';
+String _$systemHealthDataHash() => r'af3713a4fb7a678270f81bec4b2fc273e8c33d99';
 
 @ProviderFor(routingLanesData)
 final routingLanesDataProvider = RoutingLanesDataProvider._();
@@ -174,7 +174,7 @@ final class RoutingLanesDataProvider
   }
 }
 
-String _$routingLanesDataHash() => r'ec315e8a7fe7439d3a18440bb07958aa972957dd';
+String _$routingLanesDataHash() => r'930c25135fb3dbf75e9406207c6951e28bc4bbbc';
 
 @ProviderFor(requestVolumeData)
 final requestVolumeDataProvider = RequestVolumeDataProvider._();
@@ -213,7 +213,7 @@ final class RequestVolumeDataProvider
   }
 }
 
-String _$requestVolumeDataHash() => r'dabb2a2e405890c6ed9ff23f4b865dfa8b59bdb6';
+String _$requestVolumeDataHash() => r'87b2ea0262ab7d4c9fcbb63c4e3d40c558e5aad3';
 
 @ProviderFor(recentActivityData)
 final recentActivityDataProvider = RecentActivityDataProvider._();
@@ -255,4 +255,4 @@ final class RecentActivityDataProvider
 }
 
 String _$recentActivityDataHash() =>
-    r'6b2c416ba7d0ccb46effc89a40a318e0e897fae3';
+    r'd58f9f8e89f5b45e7efb5b47e8c750d5e36fbbd0';

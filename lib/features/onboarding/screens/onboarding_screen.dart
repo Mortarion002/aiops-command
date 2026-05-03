@@ -71,14 +71,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.45,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: onboardingPages[index].buildIllustration(),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24.0),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: onboardingPages[index].buildIllustration(),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 16),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         transitionBuilder: (Widget child, Animation<double> animation) {
@@ -89,6 +91,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         },
                         child: Column(
                           key: ValueKey<int>(index),
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               onboardingPages[index].title,
