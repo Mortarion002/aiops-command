@@ -48,16 +48,34 @@ class ProfileScreen extends ConsumerWidget {
               _buildInfoField("Email", user?.email ?? "No email"),
               const SizedBox(height: 16),
               
-              appUserAsync.when(
-                data: (appUser) {
-                  return Row(
+                appUserAsync.when(
+                  data: (appUser) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _buildInfoField("Age", appUser?.age?.toString() ?? "Not set"),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () => _showEditAgeDialog(context, ref, user?.uid, appUser),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.surface,
+                            foregroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                          ),
+                          child: const Text("Edit"),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => Row(
                     children: [
-                      Expanded(
-                        child: _buildInfoField("Age", appUser?.age?.toString() ?? "Not provided"),
-                      ),
+                      Expanded(child: _buildInfoField("Age", "Not set")),
                       const SizedBox(width: 16),
                       ElevatedButton(
-                        onPressed: () => _showEditAgeDialog(context, ref, appUser),
+                        onPressed: () => _showEditAgeDialog(context, ref, user?.uid, null),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.surface,
                           foregroundColor: AppColors.primary,
@@ -67,11 +85,8 @@ class ProfileScreen extends ConsumerWidget {
                         child: const Text("Edit"),
                       ),
                     ],
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildInfoField("Age", "Error loading data"),
-              ),
+                  ),
+                ),
               
               const SizedBox(height: 48),
               
@@ -133,44 +148,62 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditAgeDialog(BuildContext context, WidgetRef ref, AppUser? appUser) {
-    if (appUser == null) return;
-    
-    final controller = TextEditingController(text: appUser.age?.toString() ?? "");
-    
+  void _showEditAgeDialog(BuildContext context, WidgetRef ref, String? uid, AppUser? appUser) {
+    if (uid == null) return;
+    final controller = TextEditingController(text: appUser?.age?.toString() ?? "");
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceContainer,
         title: Text("Edit Age", style: AppTextStyles.h2),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
+          autofocus: true,
           style: AppTextStyles.bodyLg,
           decoration: InputDecoration(
             hintText: "Enter your age",
             hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
             filled: true,
             fillColor: AppColors.surface,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => context.pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text("Cancel", style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
           ),
           ElevatedButton(
             onPressed: () async {
-              final newAge = int.tryParse(controller.text);
-              if (newAge != null) {
-                final updatedUser = appUser.copyWith(age: newAge);
-                await ref.read(userRepositoryProvider).updateUser(updatedUser);
-                ref.invalidate(currentUserProfileProvider); // refresh UI
+              final newAge = int.tryParse(controller.text.trim());
+              if (newAge != null && newAge > 0) {
+                final repo = ref.read(userRepositoryProvider);
+                if (appUser != null) {
+                  // Update existing document
+                  await repo.updateUser(appUser.copyWith(age: newAge));
+                } else {
+                  // No Firestore doc yet — create one
+                  final firebaseUser = ref.read(authProvider).value;
+                  await repo.createUser(AppUser(
+                    id: uid,
+                    email: firebaseUser?.email ?? '',
+                    name: firebaseUser?.displayName ?? '',
+                    age: newAge,
+                  ));
+                }
+                ref.invalidate(currentUserProfileProvider);
               }
-              if (context.mounted) context.pop();
+              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.black),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.black,
+            ),
             child: const Text("Save"),
           ),
         ],
