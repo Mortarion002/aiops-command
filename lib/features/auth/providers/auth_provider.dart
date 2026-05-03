@@ -14,7 +14,7 @@ class AuthNotifier extends _$AuthNotifier {
     await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> signUpWithEmail(String email, String password, String name) async {
+  Future<void> signUpWithEmail(String email, String password, String name, {int? age}) async {
     final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
     await cred.user?.updateDisplayName(name);
     
@@ -23,6 +23,7 @@ class AuthNotifier extends _$AuthNotifier {
         id: cred.user!.uid,
         email: email,
         name: name,
+        age: age,
       );
       await ref.read(userRepositoryProvider).createUser(newUser);
     }
