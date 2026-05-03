@@ -55,7 +55,7 @@ final class InsightsRepositoryProvider
 }
 
 String _$insightsRepositoryHash() =>
-    r'39c2578ccd7cdfcb0425851c41d8fe83036b3c84';
+    r'5394436b905ce7e3322477464a63795f25d6d1ae';
 
 @ProviderFor(insightsData)
 final insightsDataProvider = InsightsDataProvider._();
@@ -96,4 +96,4 @@ final class InsightsDataProvider
   }
 }
 
-String _$insightsDataHash() => r'd7453938ee4a8eaa5619568adf9507b8e7d5dad2';
+String _$insightsDataHash() => r'4fd3c9ff677cae7e62d533edc0e26b8f91c81aaa';
