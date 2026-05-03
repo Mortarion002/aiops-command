@@ -37,7 +37,9 @@ class RecentActivityCard extends StatelessWidget {
                           height: 8,
                           margin: const EdgeInsets.only(top: 6),
                           decoration: BoxDecoration(
-                            color: item.isHighlight ? AppColors.accent : AppColors.surfaceBright,
+                            color: item.isHighlight
+                                ? AppColors.accent
+                                : AppColors.surfaceBright,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -50,11 +52,26 @@ class RecentActivityCard extends StatelessWidget {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Text(item.timeAgo, style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
+                                  Text(
+                                    item.timeAgo,
+                                    style: AppTextStyles.labelCaps.copyWith(
+                                      color: AppColors.mutedText,
+                                    ),
+                                  ),
                                   const SizedBox(width: 8),
-                                  Text('•', style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
+                                  Text(
+                                    '/',
+                                    style: AppTextStyles.labelCaps.copyWith(
+                                      color: AppColors.mutedText,
+                                    ),
+                                  ),
                                   const SizedBox(width: 8),
-                                  Text(item.source, style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
+                                  Text(
+                                    item.source,
+                                    style: AppTextStyles.labelCaps.copyWith(
+                                      color: AppColors.mutedText,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],

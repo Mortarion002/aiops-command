@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
@@ -57,7 +56,6 @@ class ApiKeysScreen extends StatefulWidget {
 }
 
 class _ApiKeysScreenState extends State<ApiKeysScreen> {
-  final Random _rng = Random();
   late List<_ApiKey> _keys;
   int _poolIndex = 3; // next index into pool
 
@@ -111,7 +109,9 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
           style: AppTextStyles.bodyLg,
           decoration: InputDecoration(
             hintText: 'Key label (e.g. Production)',
-            hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
+            hintStyle: AppTextStyles.bodyMd.copyWith(
+              color: AppColors.mutedText,
+            ),
             filled: true,
             fillColor: AppColors.surface,
             border: OutlineInputBorder(
@@ -123,7 +123,10 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -147,7 +150,10 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.surfaceContainerHigh,
-                  content: Text('API key generated', style: AppTextStyles.bodyMd),
+                  content: Text(
+                    'API key generated',
+                    style: AppTextStyles.bodyMd,
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -182,14 +188,20 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
                   color: AppColors.warning,
                 ),
               ),
-              const TextSpan(text: '?\n\nThis action cannot be undone. Any service using this key will lose access immediately.'),
+              const TextSpan(
+                text:
+                    '?\n\nThis action cannot be undone. Any service using this key will lose access immediately.',
+              ),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -198,13 +210,16 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.errorContainer,
-                  content: Text('Key revoked: ${key.label}', style: AppTextStyles.bodyMd),
+                  content: Text(
+                    'Key revoked: ${key.label}',
+                    style: AppTextStyles.bodyMd,
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error.withOpacity(0.15),
+              backgroundColor: AppColors.error.withValues(alpha: 0.15),
               foregroundColor: AppColors.error,
               elevation: 0,
             ),
@@ -241,7 +256,10 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
         title: Text('API Keys', style: AppTextStyles.h2),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+            icon: const Icon(
+              Icons.add_circle_outline,
+              color: AppColors.primary,
+            ),
             tooltip: 'Generate new key',
             onPressed: _generateKey,
           ),
@@ -252,9 +270,13 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
         child: _keys.isEmpty
             ? _buildEmptyState()
             : ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 itemCount: _keys.length + 1, // +1 for the header info card
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   if (index == 0) return _buildInfoCard();
                   return _buildKeyCard(_keys[index - 1], index - 1);
@@ -275,9 +297,9 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.accent.withOpacity(0.08),
+        color: AppColors.accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.accent.withOpacity(0.2)),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -286,7 +308,10 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
           Expanded(
             child: Text(
               'API keys grant full access to AIOps Command. Keep them secret and rotate regularly.',
-              style: AppTextStyles.bodyMd.copyWith(color: AppColors.accent, height: 1.4),
+              style: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.accent,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -308,7 +333,11 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
                 color: AppColors.surfaceContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.vpn_key_off, size: 36, color: AppColors.mutedText),
+              child: const Icon(
+                Icons.vpn_key_off,
+                size: 36,
+                color: AppColors.mutedText,
+              ),
             ),
             const SizedBox(height: 24),
             Text('No API Keys', style: AppTextStyles.h2),
@@ -316,7 +345,10 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
             Text(
               'Generate your first API key to start integrating with the AIOps Command CLI.',
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, height: 1.5),
+              style: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.mutedText,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
@@ -326,8 +358,13 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ],
@@ -363,14 +400,19 @@ class _ApiKeysScreenState extends State<ApiKeysScreen> {
                 Expanded(
                   child: Text(
                     apiKey.label,
-                    style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyLg.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.12),
+                    color: AppColors.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

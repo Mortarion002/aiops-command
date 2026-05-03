@@ -142,14 +142,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: _masterToggle
-              ? [AppColors.accent.withOpacity(0.10), AppColors.accent.withOpacity(0.04)]
+              ? [
+                  AppColors.accent.withValues(alpha: 0.10),
+                  AppColors.accent.withValues(alpha: 0.04),
+                ]
               : [AppColors.surface, AppColors.surface],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _masterToggle ? AppColors.accent.withOpacity(0.25) : AppColors.outline,
+          color: _masterToggle
+              ? AppColors.accent.withValues(alpha: 0.25)
+              : AppColors.outline,
         ),
       ),
       child: Row(
@@ -159,12 +164,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             height: 44,
             decoration: BoxDecoration(
               color: _masterToggle
-                  ? AppColors.accent.withOpacity(0.15)
+                  ? AppColors.accent.withValues(alpha: 0.15)
                   : AppColors.surfaceContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              _masterToggle ? Icons.notifications_active : Icons.notifications_off,
+              _masterToggle
+                  ? Icons.notifications_active
+                  : Icons.notifications_off,
               color: _masterToggle ? AppColors.accent : AppColors.mutedText,
               size: 22,
             ),
@@ -176,14 +183,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               children: [
                 Text(
                   _masterToggle ? 'Notifications On' : 'Notifications Off',
-                  style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                  style: AppTextStyles.bodyLg.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   _masterToggle
                       ? '$_enabledCount alert types active'
                       : 'All notifications paused',
-                  style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 12),
+                  style: AppTextStyles.bodyMd.copyWith(
+                    color: AppColors.mutedText,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -191,7 +203,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Switch.adaptive(
             value: _masterToggle,
             onChanged: (v) => setState(() => _masterToggle = v),
-            activeColor: AppColors.accent,
+            activeThumbColor: AppColors.accent,
           ),
         ],
       ),
@@ -216,7 +228,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (trailing != null)
             Text(
               trailing,
-              style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 11),
+              style: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.mutedText,
+                fontSize: 11,
+              ),
             ),
         ],
       ),
@@ -242,13 +257,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             return Column(
               children: [
                 ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 2,
+                  ),
                   leading: Container(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
                       color: cat.enabled && _masterToggle
-                          ? AppColors.accent.withOpacity(0.1)
+                          ? AppColors.accent.withValues(alpha: 0.1)
                           : AppColors.surfaceContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -260,21 +278,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           : AppColors.mutedText,
                     ),
                   ),
-                  title: Text(cat.title, style: AppTextStyles.bodyLg.copyWith(fontSize: 14)),
+                  title: Text(
+                    cat.title,
+                    style: AppTextStyles.bodyLg.copyWith(fontSize: 14),
+                  ),
                   subtitle: Text(
                     cat.subtitle,
-                    style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 12),
+                    style: AppTextStyles.bodyMd.copyWith(
+                      color: AppColors.mutedText,
+                      fontSize: 12,
+                    ),
                   ),
                   trailing: Switch.adaptive(
                     value: cat.enabled && _masterToggle,
                     onChanged: _masterToggle
                         ? (v) => setState(() => cat.enabled = v)
                         : null,
-                    activeColor: AppColors.accent,
+                    activeThumbColor: AppColors.accent,
                   ),
                 ),
                 if (i < _alertCategories.length - 1)
-                  Divider(height: 1, color: AppColors.outline, indent: 16, endIndent: 16),
+                  Divider(
+                    height: 1,
+                    color: AppColors.outline,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
               ],
             );
           }).toList(),
@@ -304,7 +333,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               value: _pushEnabled,
               onChanged: (v) => setState(() => _pushEnabled = v),
             ),
-            Divider(height: 1, color: AppColors.outline, indent: 16, endIndent: 16),
+            Divider(
+              height: 1,
+              color: AppColors.outline,
+              indent: 16,
+              endIndent: 16,
+            ),
             _channelTile(
               icon: Icons.email_outlined,
               title: 'Email',
@@ -312,7 +346,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               value: _emailEnabled,
               onChanged: (v) => setState(() => _emailEnabled = v),
             ),
-            Divider(height: 1, color: AppColors.outline, indent: 16, endIndent: 16),
+            Divider(
+              height: 1,
+              color: AppColors.outline,
+              indent: 16,
+              endIndent: 16,
+            ),
             _channelTile(
               icon: Icons.tag,
               title: 'Slack Integration',
@@ -340,25 +379,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         height: 36,
         decoration: BoxDecoration(
           color: value && _masterToggle
-              ? AppColors.success.withOpacity(0.1)
+              ? AppColors.success.withValues(alpha: 0.1)
               : AppColors.surfaceContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
           size: 18,
-          color: value && _masterToggle ? AppColors.success : AppColors.mutedText,
+          color: value && _masterToggle
+              ? AppColors.success
+              : AppColors.mutedText,
         ),
       ),
       title: Text(title, style: AppTextStyles.bodyLg.copyWith(fontSize: 14)),
       subtitle: Text(
         subtitle,
-        style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 12),
+        style: AppTextStyles.bodyMd.copyWith(
+          color: AppColors.mutedText,
+          fontSize: 12,
+        ),
       ),
       trailing: Switch.adaptive(
         value: value && _masterToggle,
         onChanged: _masterToggle ? onChanged : null,
-        activeColor: AppColors.success,
+        activeThumbColor: AppColors.success,
       ),
     );
   }
@@ -383,7 +427,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.summarize_outlined, size: 18, color: AppColors.mutedText),
+                const Icon(
+                  Icons.summarize_outlined,
+                  size: 18,
+                  color: AppColors.mutedText,
+                ),
                 const SizedBox(width: 10),
                 Text(
                   'Email digest frequency',
@@ -397,16 +445,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 final selected = opt == _digestFrequency;
                 return Expanded(
                   child: GestureDetector(
-                    onTap: _masterToggle ? () => setState(() => _digestFrequency = opt) : null,
+                    onTap: _masterToggle
+                        ? () => setState(() => _digestFrequency = opt)
+                        : null,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      margin: EdgeInsets.only(right: opt != options.last ? 8 : 0),
+                      margin: EdgeInsets.only(
+                        right: opt != options.last ? 8 : 0,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: selected ? AppColors.accent.withOpacity(0.12) : AppColors.surfaceContainer,
+                        color: selected
+                            ? AppColors.accent.withValues(alpha: 0.12)
+                            : AppColors.surfaceContainer,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: selected ? AppColors.accent.withOpacity(0.4) : AppColors.outline,
+                          color: selected
+                              ? AppColors.accent.withValues(alpha: 0.4)
+                              : AppColors.outline,
                         ),
                       ),
                       alignment: Alignment.center,
@@ -414,8 +470,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         opt,
                         style: AppTextStyles.bodyMd.copyWith(
                           fontSize: 11,
-                          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                          color: selected ? AppColors.accent : AppColors.mutedText,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: selected
+                              ? AppColors.accent
+                              : AppColors.mutedText,
                         ),
                       ),
                     ),
@@ -447,7 +507,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.bedtime_outlined, size: 18, color: AppColors.mutedText),
+                const Icon(
+                  Icons.bedtime_outlined,
+                  size: 18,
+                  color: AppColors.mutedText,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -456,7 +520,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceContainer,
                     borderRadius: BorderRadius.circular(8),
