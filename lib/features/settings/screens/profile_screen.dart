@@ -1,9 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -19,56 +15,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _uploadingPhoto = false;
-
-  Future<void> _pickAndUploadPhoto(User firebaseUser) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 75,
-      maxWidth: 512,
-      maxHeight: 512,
-    );
-    if (picked == null) return;
-
-    setState(() => _uploadingPhoto = true);
-    try {
-      final file = File(picked.path);
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures/${firebaseUser.uid}.jpg');
-
-      await ref.putFile(file);
-      final downloadUrl = await ref.getDownloadURL();
-
-      // Save to Firebase Auth
-      await firebaseUser.updatePhotoURL(downloadUrl);
-
-      // Save to Firestore
-      final repo = this.ref.read(userRepositoryProvider);
-      final currentUser = this.ref.read(currentUserProfileProvider).value;
-      if (currentUser != null) {
-        await repo.updateUser(currentUser.copyWith(photoUrl: downloadUrl));
-      } else {
-        await repo.createUser(AppUser(
-          id: firebaseUser.uid,
-          email: firebaseUser.email ?? '',
-          name: firebaseUser.displayName ?? '',
-          photoUrl: downloadUrl,
-        ));
-      }
-
-      this.ref.invalidate(currentUserProfileProvider);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload photo: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _uploadingPhoto = false);
-    }
-  }
 
   Future<void> _showEditAgeDialog(String uid, AppUser? appUser) async {
     final controller = TextEditingController(text: appUser?.age?.toString() ?? '');
@@ -156,8 +102,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final firebaseUser = ref.watch(authProvider).value;
     final appUserAsync = ref.watch(currentUserProfileProvider);
 
-    // Determine photo URL: Firestore → Firebase Auth (Gmail photo) → null
-    final String? photoUrl = appUserAsync.value?.photoUrl ?? firebaseUser?.photoURL;
+    // Show Gmail/Google profile photo if available
+    final String? photoUrl = firebaseUser?.photoURL;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -178,73 +124,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               const SizedBox(height: 16),
 
-              // ── Avatar with upload button ──────────────────────────────
+              // ── Avatar (Gmail photo or default icon) ───────────────────
               Center(
-                child: Stack(
-                  children: [
-                    // Photo circle
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.primary, width: 2),
-                      ),
-                      child: ClipOval(
-                        child: _uploadingPhoto
-                            ? Container(
-                                color: AppColors.surfaceContainer,
-                                child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              )
-                            : photoUrl != null
-                                ? Image.network(
-                                    photoUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      color: AppColors.surfaceContainer,
-                                      child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
-                                    ),
-                                  )
-                                : Container(
-                                    color: AppColors.surfaceContainer,
-                                    child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
-                                  ),
-                      ),
-                    ),
-
-                    // Camera badge
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: firebaseUser == null
-                            ? null
-                            : () => _pickAndUploadPhoto(firebaseUser),
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.background, width: 2),
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 2),
+                  ),
+                  child: ClipOval(
+                    child: photoUrl != null
+                        ? Image.network(
+                            photoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.surfaceContainer,
+                              child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
+                            ),
+                          )
+                        : Container(
+                            color: AppColors.surfaceContainer,
+                            child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
                           ),
-                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Tap camera to change photo',
-                  style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 12),
-                ),
-              ),
               const SizedBox(height: 32),
 
               // ── Info fields ────────────────────────────────────────────

@@ -3,14 +3,12 @@ class AppUser {
   final String email;
   final String name;
   final int? age;
-  final String? photoUrl;
 
   const AppUser({
     required this.id,
     required this.email,
     required this.name,
     this.age,
-    this.photoUrl,
   });
 
   AppUser copyWith({
@@ -18,14 +16,12 @@ class AppUser {
     String? email,
     String? name,
     int? age,
-    String? photoUrl,
   }) {
     return AppUser(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
       age: age ?? this.age,
-      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 
@@ -35,7 +31,6 @@ class AppUser {
       'email': email,
       'name': name,
       'age': age,
-      'photoUrl': photoUrl,
     };
   }
 
@@ -45,7 +40,6 @@ class AppUser {
       email: map['email'] ?? '',
       name: map['name'] ?? '',
       age: map['age']?.toInt(),
-      photoUrl: map['photoUrl'],
     );
   }
 }
