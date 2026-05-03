@@ -23,16 +23,17 @@ GoRouter appRouter(Ref ref) {
     initialLocation: '/onboarding',
     redirect: (context, state) {
       final isAuthenticated = authState.value != null;
-
-      if (state.matchedLocation.startsWith('/onboarding')) return null;
-
+      final isOnboarding = state.matchedLocation.startsWith('/onboarding');
       final isAuthRoute = ['/login', '/signup', '/forgot-password']
           .contains(state.matchedLocation);
-          
-      if (isAuthenticated && isAuthRoute) return '/dashboard';
-      if (!isAuthenticated && !isAuthRoute) return '/onboarding';
 
-      return null;
+      if (isAuthenticated) {
+        if (isAuthRoute || isOnboarding) return '/dashboard';
+        return null;
+      } else {
+        if (!isAuthRoute && !isOnboarding) return '/onboarding';
+        return null;
+      }
     },
     routes: [
       GoRoute(
