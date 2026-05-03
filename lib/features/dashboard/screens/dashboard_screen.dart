@@ -34,6 +34,13 @@ class DashboardScreen extends ConsumerWidget {
             ref.invalidate(routingLanesDataProvider);
             ref.invalidate(requestVolumeDataProvider);
             ref.invalidate(recentActivityDataProvider);
+            await Future.wait([
+              ref.read(kpiDataProvider.future),
+              ref.read(systemHealthDataProvider.future),
+              ref.read(routingLanesDataProvider.future),
+              ref.read(requestVolumeDataProvider.future),
+              ref.read(recentActivityDataProvider.future),
+            ]);
           },
           child: CustomScrollView(
             slivers: [
@@ -49,38 +56,61 @@ class DashboardScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // KPIs
                     kpiData.when(
-                      data: (kpis) => GridView.count(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        childAspectRatio: 1.25,
+                      data: (kpis) => _KpiGrid(
                         children: [
-                          KpiCard(label: "Requests", value: kpis.requests, unit: "/s", badgeText: kpis.requestsBadge, badgeType: kpis.requestsBadgeType),
-                          KpiCard(label: "Latency", value: kpis.latency, unit: "P99", badgeText: kpis.latencyBadge, badgeType: kpis.latencyBadgeType),
-                          KpiCard(label: "Error Rate", value: kpis.errorRate, unit: "%", badgeText: kpis.errorBadge, badgeType: kpis.errorBadgeType),
-                          KpiCard(label: "Active Nodes", value: kpis.activeNodes, unit: "online", badgeText: kpis.nodesBadge, badgeType: kpis.nodesBadgeType),
+                          KpiCard(
+                            label: "Requests",
+                            value: kpis.requests,
+                            unit: "/s",
+                            badgeText: kpis.requestsBadge,
+                            badgeType: kpis.requestsBadgeType,
+                          ),
+                          KpiCard(
+                            label: "Latency",
+                            value: kpis.latency,
+                            unit: "P99",
+                            badgeText: kpis.latencyBadge,
+                            badgeType: kpis.latencyBadgeType,
+                          ),
+                          KpiCard(
+                            label: "Error Rate",
+                            value: kpis.errorRate,
+                            unit: "%",
+                            badgeText: kpis.errorBadge,
+                            badgeType: kpis.errorBadgeType,
+                          ),
+                          KpiCard(
+                            label: "Active Nodes",
+                            value: kpis.activeNodes,
+                            unit: "online",
+                            badgeText: kpis.nodesBadge,
+                            badgeType: kpis.nodesBadgeType,
+                          ),
                         ],
                       ),
                       loading: () => const LoadingShimmer(height: 200),
-                      error: (err, stack) => Text("Error loading KPIs", style: AppTextStyles.bodyMd.copyWith(color: AppColors.error)),
+                      error: (err, stack) => Text(
+                        "Error loading KPIs",
+                        style: AppTextStyles.bodyMd.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Request Volume Chart
                     requestVolume.when(
                       data: (points) => RequestVolumeChart(points: points),
                       loading: () => const LoadingShimmer(height: 150),
-                      error: (_, __) => const SizedBox(),
+                      error: (error, stackTrace) => const SizedBox(),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // System Health & Routing Lanes
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,13 +118,13 @@ class DashboardScreen extends ConsumerWidget {
                         systemHealth.when(
                           data: (items) => SystemHealthSection(items: items),
                           loading: () => const LoadingShimmer(height: 200),
-                          error: (_, __) => const SizedBox(),
+                          error: (error, stackTrace) => const SizedBox(),
                         ),
                         const SizedBox(height: 32),
                         routingLanes.when(
                           data: (lanes) => RoutingLanesCard(lanes: lanes),
                           loading: () => const LoadingShimmer(height: 200),
-                          error: (_, __) => const SizedBox(),
+                          error: (error, stackTrace) => const SizedBox(),
                         ),
                       ],
                     ),
@@ -103,11 +133,12 @@ class DashboardScreen extends ConsumerWidget {
 
                     // Recent Activity
                     recentActivity.when(
-                      data: (activities) => RecentActivityCard(activities: activities),
+                      data: (activities) =>
+                          RecentActivityCard(activities: activities),
                       loading: () => const LoadingShimmer(height: 200),
-                      error: (_, __) => const SizedBox(),
+                      error: (error, stackTrace) => const SizedBox(),
                     ),
-                    
+
                     const SizedBox(height: 32),
                   ]),
                 ),
@@ -116,6 +147,38 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _KpiGrid extends StatelessWidget {
+  final List<Widget> children;
+
+  const _KpiGrid({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    const spacing = 16.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth - spacing) / 2;
+        final itemHeight = itemWidth / 1.25;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: children
+              .map(
+                (child) => SizedBox(
+                  width: itemWidth,
+                  height: itemHeight,
+                  child: child,
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
 }

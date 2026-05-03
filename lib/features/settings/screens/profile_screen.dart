@@ -15,80 +15,100 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-
   Future<void> _showEditAgeDialog(String uid, AppUser? appUser) async {
-    final controller = TextEditingController(text: appUser?.age?.toString() ?? '');
-
-    await showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainer,
-        title: Text('Edit Age', style: AppTextStyles.h2),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          style: AppTextStyles.bodyLg,
-          decoration: InputDecoration(
-            hintText: 'Enter your age',
-            hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newAge = int.tryParse(controller.text.trim());
-              if (newAge != null && newAge > 0) {
-                final repo = ref.read(userRepositoryProvider);
-                if (appUser != null) {
-                  await repo.updateUser(appUser.copyWith(age: newAge));
-                } else {
-                  final firebaseUser = ref.read(authProvider).value;
-                  await repo.createUser(AppUser(
-                    id: uid,
-                    email: firebaseUser?.email ?? '',
-                    name: firebaseUser?.displayName ?? '',
-                    age: newAge,
-                  ));
-                }
-                ref.invalidate(currentUserProfileProvider);
-              }
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.black,
-            ),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+    final controller = TextEditingController(
+      text: appUser?.age?.toString() ?? '',
     );
+
+    try {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: AppColors.surfaceContainer,
+          title: Text('Edit Age', style: AppTextStyles.h2),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            style: AppTextStyles.bodyLg,
+            decoration: InputDecoration(
+              hintText: 'Enter your age',
+              hintStyle: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.mutedText,
+              ),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.bodyMd.copyWith(
+                  color: AppColors.mutedText,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final newAge = int.tryParse(controller.text.trim());
+                if (newAge != null && newAge > 0) {
+                  final repo = ref.read(userRepositoryProvider);
+                  if (appUser != null) {
+                    await repo.updateUser(appUser.copyWith(age: newAge));
+                  } else {
+                    final firebaseUser = ref.read(authProvider).value;
+                    await repo.createUser(
+                      AppUser(
+                        id: uid,
+                        email: firebaseUser?.email ?? '',
+                        name: firebaseUser?.displayName ?? '',
+                        age: newAge,
+                      ),
+                    );
+                  }
+                  if (!mounted) return;
+                  ref.invalidate(currentUserProfileProvider);
+                }
+                if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.black,
+              ),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
   Widget _buildInfoField(String label, String value, {Widget? trailing}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(),
-            style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText),
+        ),
         const SizedBox(height: 8),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
@@ -97,10 +117,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Text(value, style: AppTextStyles.bodyLg),
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 12),
-              trailing,
-            ],
+            if (trailing != null) ...[const SizedBox(width: 12), trailing],
           ],
         ),
       ],
@@ -148,14 +165,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ? Image.network(
                             photoUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.surfaceContainer,
-                              child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppColors.surfaceContainer,
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 48,
+                                    color: AppColors.mutedText,
+                                  ),
+                                ),
                           )
                         : Container(
                             color: AppColors.surfaceContainer,
-                            child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
+                            child: const Icon(
+                              Icons.person,
+                              size: 48,
+                              color: AppColors.mutedText,
+                            ),
                           ),
                   ),
                 ),
@@ -164,7 +190,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 32),
 
               // ── Info fields ────────────────────────────────────────────
-              _buildInfoField('Name', firebaseUser?.displayName ?? 'Not provided'),
+              _buildInfoField(
+                'Name',
+                firebaseUser?.displayName ?? 'Not provided',
+              ),
               const SizedBox(height: 16),
               _buildInfoField('Email', firebaseUser?.email ?? 'No email'),
               const SizedBox(height: 16),
@@ -180,14 +209,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.surface,
                       foregroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                     child: const Text('Edit'),
                   ),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildInfoField(
+                error: (error, stackTrace) => _buildInfoField(
                   'Age',
                   'Not set',
                   trailing: ElevatedButton(
@@ -197,8 +231,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.surface,
                       foregroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                     child: const Text('Edit'),
                   ),
@@ -209,18 +248,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // ── Action buttons ─────────────────────────────────────────
               OutlinedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (firebaseUser?.email != null) {
-                    ref.read(authProvider.notifier).sendPasswordResetEmail(firebaseUser!.email!);
+                    await ref
+                        .read(authProvider.notifier)
+                        .sendPasswordResetEmail(firebaseUser!.email!);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password reset email sent')),
+                      const SnackBar(
+                        content: Text('Password reset email sent'),
+                      ),
                     );
                   }
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: AppColors.outline),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
                 child: Text('Reset Password', style: AppTextStyles.bodyLg),
               ),
@@ -228,14 +274,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ElevatedButton(
                 onPressed: () => ref.read(authProvider.notifier).signOut(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error.withOpacity(0.1),
+                  backgroundColor: AppColors.error.withValues(alpha: 0.1),
                   foregroundColor: AppColors.error,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: Text('Sign Out',
-                    style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600)),
+                child: Text(
+                  'Sign Out',
+                  style: AppTextStyles.bodyLg.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),

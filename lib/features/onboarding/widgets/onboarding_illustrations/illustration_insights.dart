@@ -43,13 +43,29 @@ class _InsightsPainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(const Offset(20, 40), Offset(size.width - 20, 40), greenPaint);
-    canvas.drawLine(const Offset(20, 70), Offset(size.width - 20, 70), redPaint);
-    canvas.drawLine(const Offset(20, 100), Offset(size.width - 20, 100), thinGreenPaint);
+    canvas.drawLine(
+      const Offset(20, 40),
+      Offset(size.width - 20, 40),
+      greenPaint,
+    );
+    canvas.drawLine(
+      const Offset(20, 70),
+      Offset(size.width - 20, 70),
+      redPaint,
+    );
+    canvas.drawLine(
+      const Offset(20, 100),
+      Offset(size.width - 20, 100),
+      thinGreenPaint,
+    );
 
-    final cornerPaint = Paint()..color = AppColors.surfaceContainerHigh.withOpacity(0.3);
+    final cornerPaint = Paint()
+      ..color = AppColors.surfaceContainerHigh.withValues(alpha: 0.3);
     canvas.drawRect(const Rect.fromLTWH(-10, -10, 30, 30), cornerPaint);
-    canvas.drawRect(Rect.fromLTWH(size.width - 20, size.height - 20, 30, 30), cornerPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(size.width - 20, size.height - 20, 30, 30),
+      cornerPaint,
+    );
   }
 
   @override

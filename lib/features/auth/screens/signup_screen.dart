@@ -68,6 +68,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       await ref.read(authProvider.notifier).signUpWithEmail(email, password, name, age: age);
       // Router will handle navigation
     } catch (e) {
+      if (!mounted) return;
       ref.read(authErrorProvider.notifier).setError("Failed to create account. Please try again.");
       setState(() => _isLoading = false);
     }

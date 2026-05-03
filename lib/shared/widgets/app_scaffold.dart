@@ -15,9 +15,7 @@ class AppScaffold extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF111111),
-          border: Border(
-            top: BorderSide(color: AppColors.outline, width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.outline, width: 1)),
         ),
         child: SafeArea(
           child: Padding(
@@ -65,7 +63,6 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NavItem({
-    super.key,
     required this.icon,
     required this.label,
     required this.isActive,
@@ -75,7 +72,7 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isActive ? const Color(0xFFF5F5F5) : const Color(0xFFA3A3A3);
-    
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
