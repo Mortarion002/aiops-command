@@ -76,22 +76,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoField(String label, String value) {
+  Widget _buildInfoField(String label, String value, {Widget? trailing}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label.toUpperCase(),
             style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
         const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.outlineVariant),
-          ),
-          child: Text(value, style: AppTextStyles.bodyLg),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.outlineVariant),
+                ),
+                child: Text(value, style: AppTextStyles.bodyLg),
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 12),
+              trailing,
+            ],
+          ],
         ),
       ],
     );
@@ -160,44 +170,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 16),
 
               appUserAsync.when(
-                data: (appUser) => Row(
-                  children: [
-                    Expanded(
-                      child: _buildInfoField('Age', appUser?.age?.toString() ?? 'Not set'),
+                data: (appUser) => _buildInfoField(
+                  'Age',
+                  appUser?.age?.toString() ?? 'Not set',
+                  trailing: ElevatedButton(
+                    onPressed: firebaseUser == null
+                        ? null
+                        : () => _showEditAgeDialog(firebaseUser.uid, appUser),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      foregroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: firebaseUser == null
-                          ? null
-                          : () => _showEditAgeDialog(firebaseUser.uid, appUser),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface,
-                        foregroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      ),
-                      child: const Text('Edit'),
-                    ),
-                  ],
+                    child: const Text('Edit'),
+                  ),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => Row(
-                  children: [
-                    Expanded(child: _buildInfoField('Age', 'Not set')),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: firebaseUser == null
-                          ? null
-                          : () => _showEditAgeDialog(firebaseUser.uid, null),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surface,
-                        foregroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      ),
-                      child: const Text('Edit'),
+                error: (_, __) => _buildInfoField(
+                  'Age',
+                  'Not set',
+                  trailing: ElevatedButton(
+                    onPressed: firebaseUser == null
+                        ? null
+                        : () => _showEditAgeDialog(firebaseUser.uid, null),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      foregroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
-                  ],
+                    child: const Text('Edit'),
+                  ),
                 ),
               ),
 
