@@ -56,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
           SettingItem(
             title: "Documentation",
             icon: Icons.description_outlined,
-            onTap: () {},
+            onTap: () => context.push('/documentation'),
           ),
           SettingItem(
             title: "Sign Out",
