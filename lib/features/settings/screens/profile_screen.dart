@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -8,162 +11,80 @@ import '../../auth/providers/user_profile_provider.dart';
 import '../../auth/models/app_user.dart';
 import '../../auth/repositories/user_repository.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).value;
-    final appUserAsync = ref.watch(currentUserProfileProvider);
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: Text("Profile", style: AppTextStyles.h2),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 24),
-              // Avatar placeholder
-              const CircleAvatar(
-                radius: 48,
-                backgroundColor: AppColors.surfaceContainer,
-                child: Icon(Icons.person, size: 48, color: AppColors.mutedText),
-              ),
-              const SizedBox(height: 32),
-              
-              // Information Fields
-              _buildInfoField("Name", user?.displayName ?? "Not provided"),
-              const SizedBox(height: 16),
-              _buildInfoField("Email", user?.email ?? "No email"),
-              const SizedBox(height: 16),
-              
-                appUserAsync.when(
-                  data: (appUser) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoField("Age", appUser?.age?.toString() ?? "Not set"),
-                        ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: () => _showEditAgeDialog(context, ref, user?.uid, appUser),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.surface,
-                            foregroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                          ),
-                          child: const Text("Edit"),
-                        ),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => Row(
-                    children: [
-                      Expanded(child: _buildInfoField("Age", "Not set")),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed: () => _showEditAgeDialog(context, ref, user?.uid, null),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.surface,
-                          foregroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                        ),
-                        child: const Text("Edit"),
-                      ),
-                    ],
-                  ),
-                ),
-              
-              const SizedBox(height: 48),
-              
-              // Action Buttons
-              OutlinedButton(
-                onPressed: () {
-                  if (user?.email != null) {
-                    ref.read(authProvider.notifier).sendPasswordResetEmail(user!.email!);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password reset email sent')),
-                    );
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: AppColors.outline),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text("Reset Password", style: AppTextStyles.bodyLg),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.read(authProvider.notifier).signOut();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error.withOpacity(0.1),
-                  foregroundColor: AppColors.error,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text("Sign Out", style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-        ),
-      ),
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _uploadingPhoto = false;
+
+  Future<void> _pickAndUploadPhoto(User firebaseUser) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 75,
+      maxWidth: 512,
+      maxHeight: 512,
     );
+    if (picked == null) return;
+
+    setState(() => _uploadingPhoto = true);
+    try {
+      final file = File(picked.path);
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures/${firebaseUser.uid}.jpg');
+
+      await ref.putFile(file);
+      final downloadUrl = await ref.getDownloadURL();
+
+      // Save to Firebase Auth
+      await firebaseUser.updatePhotoURL(downloadUrl);
+
+      // Save to Firestore
+      final repo = this.ref.read(userRepositoryProvider);
+      final currentUser = this.ref.read(currentUserProfileProvider).value;
+      if (currentUser != null) {
+        await repo.updateUser(currentUser.copyWith(photoUrl: downloadUrl));
+      } else {
+        await repo.createUser(AppUser(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          name: firebaseUser.displayName ?? '',
+          photoUrl: downloadUrl,
+        ));
+      }
+
+      this.ref.invalidate(currentUserProfileProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload photo: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingPhoto = false);
+    }
   }
 
-  Widget _buildInfoField(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.outlineVariant),
-          ),
-          child: Text(value, style: AppTextStyles.bodyLg),
-        ),
-      ],
-    );
-  }
+  Future<void> _showEditAgeDialog(String uid, AppUser? appUser) async {
+    final controller = TextEditingController(text: appUser?.age?.toString() ?? '');
 
-  void _showEditAgeDialog(BuildContext context, WidgetRef ref, String? uid, AppUser? appUser) {
-    if (uid == null) return;
-    final controller = TextEditingController(text: appUser?.age?.toString() ?? "");
-
-    showDialog(
+    await showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surfaceContainer,
-        title: Text("Edit Age", style: AppTextStyles.h2),
+        title: Text('Edit Age', style: AppTextStyles.h2),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
           style: AppTextStyles.bodyLg,
           decoration: InputDecoration(
-            hintText: "Enter your age",
+            hintText: 'Enter your age',
             hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
             filled: true,
             fillColor: AppColors.surface,
@@ -176,7 +97,7 @@ class ProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text("Cancel", style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
+            child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -184,10 +105,8 @@ class ProfileScreen extends ConsumerWidget {
               if (newAge != null && newAge > 0) {
                 final repo = ref.read(userRepositoryProvider);
                 if (appUser != null) {
-                  // Update existing document
                   await repo.updateUser(appUser.copyWith(age: newAge));
                 } else {
-                  // No Firestore doc yet — create one
                   final firebaseUser = ref.read(authProvider).value;
                   await repo.createUser(AppUser(
                     id: uid,
@@ -204,9 +123,213 @@ class ProfileScreen extends ConsumerWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.black,
             ),
-            child: const Text("Save"),
+            child: const Text('Save'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(),
+            style: AppTextStyles.labelCaps.copyWith(color: AppColors.mutedText)),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.outlineVariant),
+          ),
+          child: Text(value, style: AppTextStyles.bodyLg),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = ref.watch(authProvider).value;
+    final appUserAsync = ref.watch(currentUserProfileProvider);
+
+    // Determine photo URL: Firestore → Firebase Auth (Gmail photo) → null
+    final String? photoUrl = appUserAsync.value?.photoUrl ?? firebaseUser?.photoURL;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text('Profile', style: AppTextStyles.h2),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 16),
+
+              // ── Avatar with upload button ──────────────────────────────
+              Center(
+                child: Stack(
+                  children: [
+                    // Photo circle
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primary, width: 2),
+                      ),
+                      child: ClipOval(
+                        child: _uploadingPhoto
+                            ? Container(
+                                color: AppColors.surfaceContainer,
+                                child: const Center(
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              )
+                            : photoUrl != null
+                                ? Image.network(
+                                    photoUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: AppColors.surfaceContainer,
+                                      child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
+                                    ),
+                                  )
+                                : Container(
+                                    color: AppColors.surfaceContainer,
+                                    child: const Icon(Icons.person, size: 48, color: AppColors.mutedText),
+                                  ),
+                      ),
+                    ),
+
+                    // Camera badge
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: firebaseUser == null
+                            ? null
+                            : () => _pickAndUploadPhoto(firebaseUser),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.background, width: 2),
+                          ),
+                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  'Tap camera to change photo',
+                  style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText, fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // ── Info fields ────────────────────────────────────────────
+              _buildInfoField('Name', firebaseUser?.displayName ?? 'Not provided'),
+              const SizedBox(height: 16),
+              _buildInfoField('Email', firebaseUser?.email ?? 'No email'),
+              const SizedBox(height: 16),
+
+              appUserAsync.when(
+                data: (appUser) => Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoField('Age', appUser?.age?.toString() ?? 'Not set'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: firebaseUser == null
+                          ? null
+                          : () => _showEditAgeDialog(firebaseUser.uid, appUser),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      ),
+                      child: const Text('Edit'),
+                    ),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Row(
+                  children: [
+                    Expanded(child: _buildInfoField('Age', 'Not set')),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: firebaseUser == null
+                          ? null
+                          : () => _showEditAgeDialog(firebaseUser.uid, null),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      ),
+                      child: const Text('Edit'),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 48),
+
+              // ── Action buttons ─────────────────────────────────────────
+              OutlinedButton(
+                onPressed: () {
+                  if (firebaseUser?.email != null) {
+                    ref.read(authProvider.notifier).sendPasswordResetEmail(firebaseUser!.email!);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password reset email sent')),
+                    );
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: AppColors.outline),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text('Reset Password', style: AppTextStyles.bodyLg),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.read(authProvider.notifier).signOut(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error.withOpacity(0.1),
+                  foregroundColor: AppColors.error,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text('Sign Out',
+                    style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
