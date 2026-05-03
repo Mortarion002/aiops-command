@@ -39,7 +39,7 @@ class SettingsScreen extends ConsumerWidget {
             title: "Notifications",
             subtitle: "Configure alerts and digests",
             icon: Icons.notifications_none,
-            onTap: () {},
+            onTap: () => context.push('/notifications'),
           ),
           SettingItem(
             title: "Theme",
