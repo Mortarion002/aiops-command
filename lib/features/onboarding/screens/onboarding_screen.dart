@@ -91,6 +91,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         },
                         child: Column(
                           key: ValueKey<int>(index),
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               onboardingPages[index].title,

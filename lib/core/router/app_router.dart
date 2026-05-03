@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -15,17 +16,38 @@ import '../../features/auth/providers/auth_provider.dart';
 
 part 'app_router.g.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+  late final StreamSubscription<dynamic> _subscription;
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 @riverpod
 GoRouter appRouter(Ref ref) {
-  final authState = ref.watch(authProvider);
+  final authNotifier = ref.watch(authProvider.notifier);
 
   return GoRouter(
     initialLocation: '/onboarding',
+    refreshListenable: GoRouterRefreshStream(authNotifier.build()),
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
+      
+      if (authState.isLoading) return null;
+
       final isAuthenticated = authState.value != null;
-      final isOnboarding = state.matchedLocation.startsWith('/onboarding');
+      final location = state.uri.path;
+      final isOnboarding = location.startsWith('/onboarding');
       final isAuthRoute = ['/login', '/signup', '/forgot-password']
-          .contains(state.matchedLocation);
+          .contains(location);
 
       if (isAuthenticated) {
         if (isAuthRoute || isOnboarding) return '/dashboard';

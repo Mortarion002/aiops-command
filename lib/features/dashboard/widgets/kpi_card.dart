@@ -24,7 +24,7 @@ class KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       radius: 12,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

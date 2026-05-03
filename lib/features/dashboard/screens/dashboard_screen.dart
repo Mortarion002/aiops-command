@@ -58,7 +58,7 @@ class DashboardScreen extends ConsumerWidget {
                         mainAxisSpacing: 16,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        childAspectRatio: 1.5,
+                        childAspectRatio: 1.25,
                         children: [
                           KpiCard(label: "Requests", value: kpis.requests, unit: "/s", badgeText: kpis.requestsBadge, badgeType: kpis.requestsBadgeType),
                           KpiCard(label: "Latency", value: kpis.latency, unit: "P99", badgeText: kpis.latencyBadge, badgeType: kpis.latencyBadgeType),
@@ -82,25 +82,19 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 32),
                     
                     // System Health & Routing Lanes
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          flex: 3,
-                          child: systemHealth.when(
-                            data: (items) => SystemHealthSection(items: items),
-                            loading: () => const LoadingShimmer(height: 200),
-                            error: (_, __) => const SizedBox(),
-                          ),
+                        systemHealth.when(
+                          data: (items) => SystemHealthSection(items: items),
+                          loading: () => const LoadingShimmer(height: 200),
+                          error: (_, __) => const SizedBox(),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 2,
-                          child: routingLanes.when(
-                            data: (lanes) => RoutingLanesCard(lanes: lanes),
-                            loading: () => const LoadingShimmer(height: 200),
-                            error: (_, __) => const SizedBox(),
-                          ),
+                        const SizedBox(height: 32),
+                        routingLanes.when(
+                          data: (lanes) => RoutingLanesCard(lanes: lanes),
+                          loading: () => const LoadingShimmer(height: 200),
+                          error: (_, __) => const SizedBox(),
                         ),
                       ],
                     ),
