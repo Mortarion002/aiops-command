@@ -6,7 +6,7 @@ import '../models/log_entry_model.dart';
 part 'activity_provider.g.dart';
 
 @riverpod
-IActivityRepository activityRepository(ActivityRepositoryRef ref) => MockActivityRepository();
+IActivityRepository activityRepository(Ref ref) => MockActivityRepository();
 
 @riverpod
 class LogFilterNotifier extends _$LogFilterNotifier {
@@ -17,7 +17,7 @@ class LogFilterNotifier extends _$LogFilterNotifier {
 }
 
 @riverpod
-Future<List<LogEntry>> logsData(LogsDataRef ref) {
-  final filter = ref.watch(logFilterNotifierProvider);
+Future<List<LogEntry>> logsData(Ref ref) {
+  final filter = ref.watch(logFilterProvider);
   return ref.watch(activityRepositoryProvider).getLogs(filter);
 }

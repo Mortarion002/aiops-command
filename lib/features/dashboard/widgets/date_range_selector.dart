@@ -9,7 +9,7 @@ class DateRangeSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentRange = ref.watch(dateRangeNotifierProvider);
+    final currentRange = ref.watch(dateRangeProvider);
     final label = _getLabel(currentRange);
 
     return InkWell(
@@ -54,7 +54,7 @@ class DateRangeSelector extends ConsumerWidget {
               return ListTile(
                 title: Text(_getLabel(range), style: AppTextStyles.bodyMd),
                 onTap: () {
-                  ref.read(dateRangeNotifierProvider.notifier).setRange(range);
+                  ref.read(dateRangeProvider.notifier).setRange(range);
                   Navigator.pop(context);
                 },
               );

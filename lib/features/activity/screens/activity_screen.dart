@@ -11,7 +11,7 @@ class ActivityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filter = ref.watch(logFilterNotifierProvider);
+    final filter = ref.watch(logFilterProvider);
     final logsAsync = ref.watch(logsDataProvider);
 
     return Scaffold(
@@ -40,7 +40,7 @@ class ActivityScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(color: isSelected ? AppColors.primary : AppColors.outline),
                         ),
-                        onSelected: (_) => ref.read(logFilterNotifierProvider.notifier).setFilter(f),
+                        onSelected: (_) => ref.read(logFilterProvider.notifier).setFilter(f),
                       ),
                     );
                   }).toList(),

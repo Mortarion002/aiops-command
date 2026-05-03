@@ -19,7 +19,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: ref.read(onboardingNotifierProvider));
+    _pageController = PageController(initialPage: ref.read(onboardingProvider));
   }
 
   @override
@@ -29,9 +29,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onNext() {
-    final currentIndex = ref.read(onboardingNotifierProvider);
+    final currentIndex = ref.read(onboardingProvider);
     if (currentIndex < 3) {
-      ref.read(onboardingNotifierProvider.notifier).nextPage();
+      ref.read(onboardingProvider.notifier).nextPage();
       _pageController.animateToPage(
         currentIndex + 1,
         duration: const Duration(milliseconds: 300),
@@ -48,7 +48,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentIndex = ref.watch(onboardingNotifierProvider);
+    final currentIndex = ref.watch(onboardingProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,

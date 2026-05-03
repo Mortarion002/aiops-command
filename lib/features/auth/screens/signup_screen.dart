@@ -38,28 +38,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final confirm = _confirmPasswordController.text;
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
-      ref.read(authErrorNotifierProvider.notifier).setError("All fields are required");
+      ref.read(authErrorProvider.notifier).setError("All fields are required");
       return;
     }
     
     if (password.length < 8) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Password must be at least 8 characters");
+      ref.read(authErrorProvider.notifier).setError("Password must be at least 8 characters");
       return;
     }
 
     if (password != confirm) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Passwords do not match");
+      ref.read(authErrorProvider.notifier).setError("Passwords do not match");
       return;
     }
 
     setState(() => _isLoading = true);
-    ref.read(authErrorNotifierProvider.notifier).clear();
+    ref.read(authErrorProvider.notifier).clear();
 
     try {
-      await ref.read(authNotifierProvider.notifier).signUpWithEmail(email, password, name);
+      await ref.read(authProvider.notifier).signUpWithEmail(email, password, name);
       // Router will handle navigation
     } catch (e) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Failed to create account. Please try again.");
+      ref.read(authErrorProvider.notifier).setError("Failed to create account. Please try again.");
       setState(() => _isLoading = false);
     }
   }

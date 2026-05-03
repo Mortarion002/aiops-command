@@ -10,7 +10,7 @@ class AuthErrorBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final error = ref.watch(authErrorNotifierProvider);
+    final error = ref.watch(authErrorProvider);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),

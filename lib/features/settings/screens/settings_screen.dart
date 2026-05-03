@@ -60,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
           SettingItem(
             title: "Sign Out",
             icon: Icons.logout,
-            onTap: () => ref.read(authNotifierProvider.notifier).signOut(),
+            onTap: () => ref.read(authProvider.notifier).signOut(),
           ),
         ],
       ),

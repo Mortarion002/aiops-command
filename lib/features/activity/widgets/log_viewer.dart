@@ -27,14 +27,14 @@ class LogViewer extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 80,
-                  child: Text(log.timestamp, style: AppTextStyles.sourceCode.copyWith(color: AppColors.mutedText)),
+                  child: Text(log.timestamp, style: AppTextStyles.monoKey.copyWith(color: AppColors.mutedText)),
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
                   width: 60,
                   child: Text(
                     log.level,
-                    style: AppTextStyles.sourceCode.copyWith(color: _getLevelColor(log.level)),
+                    style: AppTextStyles.monoKey.copyWith(color: _getLevelColor(log.level)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -42,12 +42,12 @@ class LogViewer extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("[${log.service}] ${log.message}", style: AppTextStyles.sourceCode.copyWith(color: AppColors.onBackground)),
+                      Text("[${log.service}] ${log.message}", style: AppTextStyles.monoKey.copyWith(color: AppColors.onBackground)),
                       if (log.metadata.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
                           log.metadata.entries.map((e) => "${e.key}: ${e.value}").join(" | "),
-                          style: AppTextStyles.sourceCode.copyWith(color: AppColors.mutedText),
+                          style: AppTextStyles.monoKey.copyWith(color: AppColors.mutedText),
                         ),
                       ]
                     ],

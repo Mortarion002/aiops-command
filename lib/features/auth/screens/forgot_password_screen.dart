@@ -30,21 +30,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _handleReset() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Email is required");
+      ref.read(authErrorProvider.notifier).setError("Email is required");
       return;
     }
 
     setState(() => _isLoading = true);
-    ref.read(authErrorNotifierProvider.notifier).clear();
+    ref.read(authErrorProvider.notifier).clear();
 
     try {
-      await ref.read(authNotifierProvider.notifier).sendPasswordResetEmail(email);
+      await ref.read(authProvider.notifier).sendPasswordResetEmail(email);
       setState(() {
         _isSent = true;
         _isLoading = false;
       });
     } catch (e) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Failed to send reset email. Please try again.");
+      ref.read(authErrorProvider.notifier).setError("Failed to send reset email. Please try again.");
       setState(() => _isLoading = false);
     }
   }

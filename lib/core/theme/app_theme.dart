@@ -12,7 +12,7 @@ final appTheme = ThemeData(
     error: AppColors.error,
     onError: AppColors.onPrimary,
   ),
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     color: AppColors.surfaceContainer,
     elevation: 0,
     shape: RoundedRectangleBorder(

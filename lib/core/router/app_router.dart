@@ -16,13 +16,13 @@ import '../../features/auth/providers/auth_provider.dart';
 part 'app_router.g.dart';
 
 @riverpod
-GoRouter appRouter(AppRouterRef ref) {
-  final authState = ref.watch(authNotifierProvider);
+GoRouter appRouter(Ref ref) {
+  final authState = ref.watch(authProvider);
 
   return GoRouter(
     initialLocation: '/onboarding',
     redirect: (context, state) {
-      final isAuthenticated = authState.valueOrNull != null;
+      final isAuthenticated = authState.value != null;
 
       if (state.matchedLocation.startsWith('/onboarding')) return null;
 

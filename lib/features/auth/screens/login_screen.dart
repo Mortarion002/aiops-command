@@ -32,18 +32,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      ref.read(authErrorNotifierProvider.notifier).setError("Email and password are required");
+      ref.read(authErrorProvider.notifier).setError("Email and password are required");
       return;
     }
 
     setState(() => _isLoading = true);
-    ref.read(authErrorNotifierProvider.notifier).clear();
+    ref.read(authErrorProvider.notifier).clear();
 
     try {
-      await ref.read(authNotifierProvider.notifier).signInWithEmail(email, password);
+      await ref.read(authProvider.notifier).signInWithEmail(email, password);
       // Router will handle navigation
     } catch (e) {
-      ref.read(authErrorNotifierProvider.notifier).setError(_mapAuthError(e.toString()));
+      ref.read(authErrorProvider.notifier).setError(_mapAuthError(e.toString()));
       setState(() => _isLoading = false);
     }
   }

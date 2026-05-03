@@ -11,31 +11,31 @@ import '../models/activity_item_model.dart';
 part 'dashboard_provider.g.dart';
 
 @riverpod
-IDashboardRepository dashboardRepository(DashboardRepositoryRef ref) => MockDashboardRepository();
+IDashboardRepository dashboardRepository(Ref ref) => MockDashboardRepository();
 
 @riverpod
-Future<KpiSnapshot> kpiData(KpiDataRef ref) {
-  final range = ref.watch(dateRangeNotifierProvider);
+Future<KpiSnapshot> kpiData(Ref ref) {
+  final range = ref.watch(dateRangeProvider);
   return ref.watch(dashboardRepositoryProvider).getKpi(range);
 }
 
 @riverpod
-Future<List<HealthItem>> systemHealthData(SystemHealthDataRef ref) {
+Future<List<HealthItem>> systemHealthData(Ref ref) {
   return ref.watch(dashboardRepositoryProvider).getSystemHealth();
 }
 
 @riverpod
-Future<List<RoutingLane>> routingLanesData(RoutingLanesDataRef ref) {
+Future<List<RoutingLane>> routingLanesData(Ref ref) {
   return ref.watch(dashboardRepositoryProvider).getRoutingLanes();
 }
 
 @riverpod
-Future<List<ChartPoint>> requestVolumeData(RequestVolumeDataRef ref) {
-  final range = ref.watch(dateRangeNotifierProvider);
+Future<List<ChartPoint>> requestVolumeData(Ref ref) {
+  final range = ref.watch(dateRangeProvider);
   return ref.watch(dashboardRepositoryProvider).getRequestVolume(range);
 }
 
 @riverpod
-Future<List<RecentActivityItem>> recentActivityData(RecentActivityDataRef ref) {
+Future<List<RecentActivityItem>> recentActivityData(Ref ref) {
   return ref.watch(dashboardRepositoryProvider).getRecentActivity();
 }

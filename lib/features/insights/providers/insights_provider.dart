@@ -6,9 +6,9 @@ import '../models/insight_item_model.dart';
 part 'insights_provider.g.dart';
 
 @riverpod
-IInsightsRepository insightsRepository(InsightsRepositoryRef ref) => MockInsightsRepository();
+IInsightsRepository insightsRepository(Ref ref) => MockInsightsRepository();
 
 @riverpod
-Future<List<InsightItem>> insightsData(InsightsDataRef ref) {
+Future<List<InsightItem>> insightsData(Ref ref) {
   return ref.watch(insightsRepositoryProvider).getInsights();
 }
