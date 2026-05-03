@@ -9,5 +9,8 @@ class DateRangeNotifier extends _$DateRangeNotifier {
   @override
   DateRange build() => DateRange.last7Days;
 
-  void setRange(DateRange range) => state = range;
+  void setRange(DateRange range) {
+    if (state == range) return;
+    state = range;
+  }
 }

@@ -19,7 +19,10 @@ class InsightsScreen extends ConsumerWidget {
         child: RefreshIndicator(
           color: AppColors.primary,
           backgroundColor: AppColors.surfaceContainer,
-          onRefresh: () async => ref.invalidate(insightsDataProvider),
+          onRefresh: () async {
+            ref.invalidate(insightsDataProvider);
+            await ref.read(insightsDataProvider.future);
+          },
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -29,22 +32,33 @@ class InsightsScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   "Automated analysis of your infrastructure and models.",
-                  style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
+                  style: AppTextStyles.bodyMd.copyWith(
+                    color: AppColors.mutedText,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Expanded(
                   child: insightsAsync.when(
                     data: (insights) => ListView.separated(
                       itemCount: insights.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) => InsightCard(item: insights[index]),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
+                      itemBuilder: (context, index) =>
+                          InsightCard(item: insights[index]),
                     ),
                     loading: () => ListView.separated(
                       itemCount: 3,
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) => const LoadingShimmer(height: 200),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
+                      itemBuilder: (context, index) =>
+                          const LoadingShimmer(height: 200),
                     ),
-                    error: (_, __) => Text("Failed to load insights", style: AppTextStyles.bodyMd.copyWith(color: AppColors.error)),
+                    error: (error, stackTrace) => Text(
+                      "Failed to load insights",
+                      style: AppTextStyles.bodyMd.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
                   ),
                 ),
               ],

@@ -29,14 +29,27 @@ class SystemHealthSection extends StatelessWidget {
                 children: [
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    leading: Icon(_getIcon(item.name), color: AppColors.mutedText, size: 20),
+                    leading: Icon(
+                      _getIcon(item.name),
+                      color: AppColors.mutedText,
+                      size: 20,
+                    ),
                     title: Text(item.name, style: AppTextStyles.bodyMd),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(item.status, style: AppTextStyles.bodyMd.copyWith(color: _getStatusColor(item))),
+                        Text(
+                          item.status,
+                          style: AppTextStyles.bodyMd.copyWith(
+                            color: _getStatusColor(item),
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right, color: AppColors.outlineVariant, size: 20),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: AppColors.outlineVariant,
+                          size: 20,
+                        ),
                       ],
                     ),
                     onTap: () => _handleTap(context, item.name),
@@ -70,8 +83,8 @@ class SystemHealthSection extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context, String name) {
-    if (name == 'Gateway' || name == 'Workers') context.push('/activity');
-    if (name == 'Vector DB') context.push('/insights');
-    if (name == 'Budget') context.push('/settings');
+    if (name == 'Gateway' || name == 'Workers') context.go('/activity');
+    if (name == 'Vector DB') context.go('/insights');
+    if (name == 'Budget') context.go('/settings');
   }
 }
