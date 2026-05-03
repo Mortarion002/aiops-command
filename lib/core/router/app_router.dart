@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,31 +19,21 @@ import '../../features/auth/providers/auth_provider.dart';
 
 part 'app_router.g.dart';
 
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
-  }
-  late final StreamSubscription<dynamic> _subscription;
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
+class GoRouterRefreshNotifier extends ChangeNotifier {
+  void refresh() => notifyListeners();
 }
 
 @riverpod
 GoRouter appRouter(Ref ref) {
-  final authNotifier = ref.watch(authProvider.notifier);
+  final refreshNotifier = GoRouterRefreshNotifier();
+  ref.listen(authProvider, (previous, next) => refreshNotifier.refresh());
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/onboarding',
-    refreshListenable: GoRouterRefreshStream(authNotifier.build()),
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final authState = ref.read(authProvider);
-      
+
       if (authState.isLoading) return null;
 
       final isAuthenticated = authState.value != null;
@@ -137,6 +126,11 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
+
+  ref.onDispose(refreshNotifier.dispose);
+  ref.onDispose(router.dispose);
+
+  return router;
 }
 
 Widget _transitionsBuilder(

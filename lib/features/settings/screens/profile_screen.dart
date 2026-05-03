@@ -19,61 +19,66 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _showEditAgeDialog(String uid, AppUser? appUser) async {
     final controller = TextEditingController(text: appUser?.age?.toString() ?? '');
 
-    await showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surfaceContainer,
-        title: Text('Edit Age', style: AppTextStyles.h2),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          style: AppTextStyles.bodyLg,
-          decoration: InputDecoration(
-            hintText: 'Enter your age',
-            hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+    try {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: AppColors.surfaceContainer,
+          title: Text('Edit Age', style: AppTextStyles.h2),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            style: AppTextStyles.bodyLg,
+            decoration: InputDecoration(
+              hintText: 'Enter your age',
+              hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newAge = int.tryParse(controller.text.trim());
-              if (newAge != null && newAge > 0) {
-                final repo = ref.read(userRepositoryProvider);
-                if (appUser != null) {
-                  await repo.updateUser(appUser.copyWith(age: newAge));
-                } else {
-                  final firebaseUser = ref.read(authProvider).value;
-                  await repo.createUser(AppUser(
-                    id: uid,
-                    email: firebaseUser?.email ?? '',
-                    name: firebaseUser?.displayName ?? '',
-                    age: newAge,
-                  ));
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text('Cancel', style: AppTextStyles.bodyMd.copyWith(color: AppColors.mutedText)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final newAge = int.tryParse(controller.text.trim());
+                if (newAge != null && newAge > 0) {
+                  final repo = ref.read(userRepositoryProvider);
+                  if (appUser != null) {
+                    await repo.updateUser(appUser.copyWith(age: newAge));
+                  } else {
+                    final firebaseUser = ref.read(authProvider).value;
+                    await repo.createUser(AppUser(
+                      id: uid,
+                      email: firebaseUser?.email ?? '',
+                      name: firebaseUser?.displayName ?? '',
+                      age: newAge,
+                    ));
+                  }
+                  if (!mounted) return;
+                  ref.invalidate(currentUserProfileProvider);
                 }
-                ref.invalidate(currentUserProfileProvider);
-              }
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.black,
+                if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.black,
+              ),
+              child: const Text('Save'),
             ),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
   }
 
   Widget _buildInfoField(String label, String value, {Widget? trailing}) {
@@ -209,9 +214,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               // ── Action buttons ─────────────────────────────────────────
               OutlinedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (firebaseUser?.email != null) {
-                    ref.read(authProvider.notifier).sendPasswordResetEmail(firebaseUser!.email!);
+                    await ref.read(authProvider.notifier).sendPasswordResetEmail(firebaseUser!.email!);
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Password reset email sent')),
                     );

@@ -43,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authProvider.notifier).signInWithEmail(email, password);
       // Router will handle navigation
     } catch (e) {
+      if (!mounted) return;
       ref.read(authErrorProvider.notifier).setError(_mapAuthError(e.toString()));
       setState(() => _isLoading = false);
     }
